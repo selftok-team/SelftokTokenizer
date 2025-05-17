@@ -1,7 +1,7 @@
 <div align="center">
 
 <h2>⚡ Selftok: Discrete Visual Tokens of Autoregression, by Diffusion, and for Reasoning</h2>
-<p><strong>Selftok Team, Media Technology Institute, Huawei Singapore</strong></p>
+<p><strong>Selftok Team, Media Technology Institute, Huawei</strong></p>
 
 <p>
   <a href="LICENSE">
