@@ -1,0 +1,96 @@
+common:
+    output_path: 'output'
+    log_path: '/cache/logs'
+    tb_path: './outputs/selftok_enc_tb/v4'
+    val_url: './outputs/selftok_enc_tb/v4'
+    save_per_epochs: 1.0
+    eval_per_epochs: 1.0
+    eval_first: 0
+    use_fp16: 0
+    use_bf16: 1
+    use_zero: 0
+    use_fsdp: 0
+    use_2d_rope: 0
+    use_deepspeed: 0
+    random_seed: 123
+    log_interval: 50
+    machines: 1
+    task: 'selftokenc'
+    experiment_index: 0
+    delete_after_upload: True
+    log_recon_interval: 100
+    val_interval: 0
+    ckpt_interval: 1000
+    vae_path: '/cache/data/sd3_medium.ckpt'
+    resume_exclude_opt: True
+    pre_encode: False
+    resume_from_steps: 0
+    is_eval: True
+
+model:
+    pretrain_model: '/cache/model/iter_149999.pth'
+    fix_encoder: True
+    full_tokens: True
+    fix_decoder: False
+
+
+
+tokenizer:
+    is_text_tokenized: False
+    pretrained_dit_path: '/cache/data/sd3_medium.ckpt'
+    params:
+        image_size: 256
+        k: 512
+        stages: '1000'
+        k_per_stage: '512'
+        gradient_checkpointing: False
+        in_channels: 16
+        encoder_hidden_size: 16
+        ema_enc: False
+        enc_decay: 0.99
+        L2_lr: 0.
+        two_part_losses: False
+        
+        diffusion_type: 'flow'
+        noise_schedule_config:
+            schedule: 'log_norm'
+            parameterization: 'velocity'
+            force_recon: False
+            m: 0.0
+            s: 1.0
+        
+        enc: 'Enc-Qformer-Uni-XL/2'
+        enable_enc_variable_size: True
+        encoder_config:
+            time_adaln: True
+            qformer_mode: 'dual'
+            pre_norm: False
+            post_norm: True
+            xavier_init: False
+            qk_norm: False
+            attn_mask: False
+            
+        quantizer_config:
+            codebook_size: 32768
+            code_dim: 16
+            w_diversity: 1.0
+            ema_entropy_ratio: 0.8
+            w_commit: 1.0
+            decay: 0.99
+            dead_code_threshold: 0.2
+            reset_cluster_size: 0.2
+            smart_react: True
+            continuous: False
+            reg: [0.1, 0.3]
+            K: 512
+
+        model: 'MMDiT_XL_Renderer'
+        decoder_config:
+            sd3_cond_pooling: None
+            class_dropout_prob: 0.
+            train_filter: 'all'
+            freeze_filter: ''
+            init_method: None
+            time_adaln: 'pos_emb'
+        
+    
