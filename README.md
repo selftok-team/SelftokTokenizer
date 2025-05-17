@@ -65,8 +65,6 @@ Therefore, we believe that Selftok effectively addresses the long-standing chall
 
 ## 🎯 How to Use
 
-Here's a more polished and professional version of your section:
-
 ---
 
 ### 🛠️ Installation
@@ -107,7 +105,7 @@ pip install -r requirements_gpu.txt
 ```
 bash
 
-cd ./SelftokPipeline
+cd ./SelftokTokenizer
 ```
 
 
