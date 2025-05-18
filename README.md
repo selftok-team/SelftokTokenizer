@@ -20,7 +20,7 @@
 
 </div>
 <div align="center">
-<img src="assets/recon.PNG" alt="Visualization" width="60%">
+<img src="assets/recon.PNG" alt="Visualization" width="100%">
 </div>
 
 
@@ -59,7 +59,7 @@ Therefore, we believe that Selftok effectively addresses the long-standing chall
 - **SoTA** Reconstruction Performance on ImageNet 256x256
 
 <div align="center">
-<img src="assets/results_table.PNG" alt="results" width="30%">
+<img src="assets/results_table.PNG" alt="results" width="80%">
 </div>
 
 
@@ -105,6 +105,7 @@ pip install -r requirements_gpu.txt
 ```
 bash
 
+git clone https://github.com/selftok-team/SelftokTokenizer.git
 cd ./SelftokTokenizer
 ```
 
