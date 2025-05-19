@@ -35,6 +35,8 @@
 
 ## 📰 News 
 
+- **[2025.05.18]** The weights of tokenizer for Selftok are available on [HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/tree/main).
+
 - **[2025.05.15]** We have released the code of tokenizer for Selftok! The weights will be released soon.
 
 - **[2025.05.12]** We have released the paper of Selftok ([arXiv](https://arxiv.org/abs/2505.07538))! 
@@ -88,10 +90,10 @@ pip install -r requirements_gpu.txt
 
 | Tokenizer                        | Image Resolution | # Tokens | PSNR  |
 |:-------------------------------:|:----------:|:--------:|:-----:|
-| Selftok w/o Renderer (Coming Soon) | 256×256   | 512      | 21.86 |
-| Selftok w/o Renderer (Coming Soon) | 256×256  | 512      | 24.14 |
-| Selftok w/ Renderer (Coming Soon)  | 256×256   | 1024     | 23.06 |
-| Selftok w/ Renderer (Coming Soon)  | 256×256   | 1024     | 26.30 |
+| Selftok w/o Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/tokenizer_512_ckpt.pth)) | 256×256   | 512      | 21.86 |
+| Selftok w/ Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/renderer_512_ckpt.pth)) | 256×256   | 512      | 24.14 |
+| Selftok w/o Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/tokenizer_1024_ckpt.pth))  | 256×256   | 1024     | 23.06 |
+| Selftok w/ Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/renderer_1024_ckpt.pth))  | 256×256   | 1024     | 26.30 |
 
 * **Pipeline Overview**
 
@@ -219,7 +221,8 @@ for b, img in enumerate(images):
 
 * Replace all `path/to/...` with actual paths on your system or object storage.
 * The scripts assume CUDA is available; modify `device='cuda'` to `'cpu'` if running on CPU.
-* The scripts support both Ascend and GPU. If inference with GPU, replace `mimogpt.infer.SelftokPipeline` with `mimogpt.infer.SelftokPipeline_GPU`
+* The scripts support both Ascend and GPU. If inference with GPU, replace `mimogpt.infer.SelftokPipeline` with `mimogpt.infer.SelftokPipeline_GPU`.
+* If you use Selftok Tokenizer for AR training, note that we decoder the image token sequence **reversely**!
 
 
 
