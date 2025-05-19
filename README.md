@@ -95,8 +95,11 @@ pip install -r requirements_gpu.txt
 | Selftok w/o Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/tokenizer_1024_ckpt.pth))  | 256×256   | 1024     | 23.06 |
 | Selftok w/ Renderer ([HuggingFace](https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/renderer_1024_ckpt.pth))  | 256×256   | 1024     | 26.30 |
 
-**VAE path**
-We ues the VAE from SD3 ([SD3 VAE]([https://huggingface.co/selftok-team/SelftokTokenizer/blob/main/renderer_1024_ckpt.pth](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers/tree/main/vae))). 
+* **VAE path**
+  
+> We use the VAE from SD3 ([SD3 VAE](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers/tree/main/vae)). Please update the `vae_path` in the config file to point to your local path after downloading.
+
+
 
 * **Pipeline Overview**
 
