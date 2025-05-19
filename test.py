@@ -14,7 +14,7 @@ from mimogpt.infer.SelftokPipeline_gpu import NormalizeToTensor
 from torchvision.utils import save_image
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--yml-path", type=str, default="./configs/res256/256-eval.yml") # download from https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium.safetensors?download=true, require huggingface login
+parser.add_argument("--yml-path", type=str, default="./configs/res256/256-eval.yml") # download from https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium.safetensors?download=true, require huggingface login, you have to change the format to .pt with safetensor_to_pt.py
 parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth") 
 parser.add_argument("--data_size", type=int, default=512)
 

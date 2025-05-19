@@ -171,10 +171,15 @@ class SelftokPipeline():
         pretrain = ckpt_path
         
         state_dict = torch.load(pretrain, map_location="cpu")
+        # if pretrain.endswith(".safetensors"):
+        #     from safetensors.torch import load_file
+        #     state_dict = load_file(pretrain, device="cpu")
+        # else:
+        #     state_dict = torch.load(pretrain, map_location="cpu")
         print(f"Loading all...")
         if self.ema_decoder==True:
             self.ema.load_state_dict(state_dict['ema_state_dict'])
-        self.model.load_state_dict(state_dict['state_dict'], strict=False)
+        self.model.load_state_dict(state_dict, strict=False)
         
         if self.ema_decoder==True:
             self.ema.to(device)
