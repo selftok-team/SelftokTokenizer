@@ -21,7 +21,7 @@ common:
     log_recon_interval: 100
     val_interval: 0
     ckpt_interval: 1000
-    vae_path: '/cache/data/sd3_medium.ckpt'
+    vae_path: '/cache/data/sd3_medium.pt'
     resume_exclude_opt: False
     pre_encode: False
     resume_from_steps: 0
@@ -47,7 +47,7 @@ optimize:
 
 tokenizer:
     is_text_tokenized: False
-    pretrained_dit_path: '/cache/data/sd3_medium.ckpt'
+    pretrained_dit_path: '/cache/data/sd3_medium.pt'
     params:
         image_size: 256
         k: 512

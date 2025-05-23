@@ -1,16 +1,21 @@
+import os
+import sys
+print(sys.path)
+sys.path.append(".")
+
 import argparse
-from mimogpt.engine.utils import parse_args_from_yaml
+from mimogpt.infer.infer_utils import parse_args_from_yaml
 from torchvision import transforms
 from PIL import Image
 import torch
 import numpy as np
-from mimogpt.infer.SelftokPipeline import SelftokPipeline
-from mimogpt.infer.SelftokPipeline import NormalizeToTensor
+from mimogpt.infer.SelftokPipeline_gpu import SelftokPipeline
+from mimogpt.infer.SelftokPipeline_gpu import NormalizeToTensor
 from torchvision.utils import save_image
 
 parser = argparse.ArgumentParser()
-# parser.add_argument("--yml-path", type=str, default="path/to/your/config.yml")
-# parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth")
+parser.add_argument("--yml-path", type=str, default="./configs/res256/256-eval.yml") # download from https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium.safetensors?download=true, require huggingface login, you have to change the format to .pt with safetensor_to_pt.py
+parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth") 
 parser.add_argument("--data_size", type=int, default=512)
 
 args = parser.parse_args()
