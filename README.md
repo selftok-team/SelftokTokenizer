@@ -75,11 +75,9 @@ Therefore, we believe that Selftok effectively addresses the long-standing chall
 conda create -n selftok python=3.10  # or your preferred version
 conda activate selftok
 
-# For Ascend environment
+# install environment
 pip install -r requirements.txt
 
-# For GPU environment
-pip install -r requirements_gpu.txt
 ```
 
 ---
@@ -97,7 +95,7 @@ pip install -r requirements_gpu.txt
 
 * **VAE path**
   
-> We use the VAE from SD3 ([SD3 VAE](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers/tree/main/vae)). Please update the `vae_path` in the config file to point to your local path after downloading.
+> We use the VAE from SD3 ([SD3 VAE](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers/tree/main)). Please update the `sd3_pretrained` in the config file to point to your local path after downloading.
 
 
 
@@ -126,7 +124,7 @@ This script demonstrates how to convert images into token sequences using a pret
 
 ```python
 import argparse
-from mimogpt.engine.utils import parse_args_from_yaml
+from mimogpt.infer.infer_utils import parse_args_from_yaml
 from torchvision import transforms
 from PIL import Image
 import torch
@@ -135,13 +133,17 @@ from mimogpt.infer.SelftokPipeline import SelftokPipeline
 from mimogpt.infer.SelftokPipeline import NormalizeToTensor
 from torchvision.utils import save_image
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--yml-path", type=str, default="path/to/your/config.yml")
-parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth")
+parser.add_argument("--yml-path", type=str, default="./configs/res256/256-eval.yml") # you can choose other config.yml
+parser.add_argument("--pretrained", type=str, default="path/to/your/tokenizer_512_ckpt.pth") 
+parser.add_argument("--sd3_pretrained", type=str, default="path/to/your/models--stabilityai--stable-diffusion-3-medium-diffusers") 
 parser.add_argument("--data_size", type=int, default=256)
 
+args = parser.parse_args()
+
 cfg = parse_args_from_yaml(args.yml_path)
-model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, datasize=args.data_size, device='cuda')
+model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, sd3_path=args.sd3_pretrained, datasize=args.data_size, device='cuda')
 
 img_transform = transforms.Compose([
     transforms.Resize(args.data_size),
@@ -149,12 +151,13 @@ img_transform = transforms.Compose([
     NormalizeToTensor(),
 ])
 
-image_paths = ['path/to/image1.png', 'path/to/image2.png']
+image_paths = ['./test.jpg']
 images = [img_transform(Image.open(p)) for p in image_paths]
 images = torch.stack(images).to('cuda')
 
 tokens = model.encoding(images, device='cuda')
-np.save('token.npy', tokens.detach().cpu().numpy())
+np.save('./token.npy', tokens.detach().cpu().numpy())
+tokens = np.load('./token.npy')
 ```
 
 ---
@@ -165,7 +168,7 @@ Reconstruct images from token sequences using the full diffusion model (50 steps
 
 ```python
 import argparse
-from mimogpt.engine.utils import parse_args_from_yaml
+from mimogpt.infer.infer_utils import parse_args_from_yaml
 from torchvision import transforms
 from PIL import Image
 import torch
@@ -175,18 +178,22 @@ from mimogpt.infer.SelftokPipeline import NormalizeToTensor
 from torchvision.utils import save_image
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--yml-path", type=str, default="path/to/your/config.yml")
-parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth")
+parser.add_argument("--yml-path", type=str, default="./configs/res256/256-eval.yml") # you can choose other config.yml
+parser.add_argument("--pretrained", type=str, default="path/to/your/tokenizer_512_ckpt.pth") 
+parser.add_argument("--sd3_pretrained", type=str, default="path/to/your/models--stabilityai--stable-diffusion-3-medium-diffusers") 
 parser.add_argument("--data_size", type=int, default=256)
 
+args = parser.parse_args()
+
 cfg = parse_args_from_yaml(args.yml_path)
-model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, datasize=args.data_size, device='cuda')
+model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, sd3_path=args.sd3_pretrained, datasize=args.data_size, device='cuda')
 
-tokens = np.load('token.npy')
+tokens = np.load('./token.npy')
+    
 images = model.decoding(tokens, device='cuda')
+for b in range(len(images)):
+    save_image(images[b], f"./re_{b}_{args.data_size}_2.png")
 
-for b, img in enumerate(images):
-    save_image(img, f"re_{b}.png")
 ```
 
 ---
@@ -197,7 +204,7 @@ Reconstruct images using a fast, one-step renderer:
 
 ```python
 import argparse
-from mimogpt.engine.utils import parse_args_from_yaml
+from mimogpt.infer.infer_utils import parse_args_from_yaml
 from torchvision import transforms
 from PIL import Image
 import torch
@@ -207,18 +214,21 @@ from mimogpt.infer.SelftokPipeline import NormalizeToTensor
 from torchvision.utils import save_image
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--yml-path", type=str, default="path/to/your/config.yml")
-parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth")
+parser.add_argument("--yml-path", type=str, default="path/to/your/config.yml") 
+parser.add_argument("--pretrained", type=str, default="path/to/your/ckpt.pth") 
+parser.add_argument("--sd3_pretrained", type=str, default="path/to/your/models--stabilityai--stable-diffusion-3-medium-diffusers") 
 parser.add_argument("--data_size", type=int, default=256)
 
-cfg = parse_args_from_yaml(args.yml_path)
-model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, datasize=args.data_size, device='cuda')
+args = parser.parse_args()
 
-tokens = np.load('token.npy')
+cfg = parse_args_from_yaml(args.yml_path)
+model = SelftokPipeline(cfg=cfg, ckpt_path=args.pretrained, sd3_path=args.sd3_pretrained, datasize=args.data_size, device='cuda')
+
+tokens = np.load('./token.npy')
 images = model.decoding_with_renderer(tokens, device='cuda')
 
-for b, img in enumerate(images):
-    save_image(img, f"render_{b}.png")
+for b in range(len(images)):
+    save_image(images[b], f"./re_{b}_{args.data_size}_2.png")
 ```
 
 ---

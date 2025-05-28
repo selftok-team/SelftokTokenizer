@@ -13,6 +13,7 @@
 # limitations under the License.
 # ============================================================================
 
+
 import sys
 import os
 print(sys.path)
@@ -20,11 +21,11 @@ sys.path.append(".")
 
 import torch
 
-####For running on GPU, comment out this part
-import torch_npu
-torch_npu.npu.set_compile_mode(jit_compile=False)
-from torch_npu.contrib import transfer_to_npu
-#####
+# ####For running on GPU, comment out this part
+# import torch_npu
+# torch_npu.npu.set_compile_mode(jit_compile=False)
+# from torch_npu.contrib import transfer_to_npu
+# #####
 
 from torchvision import transforms
 import numpy as np
@@ -39,10 +40,21 @@ from mimogpt.models.selftok.sd3.sd3_impls import SDVAE, SD3LatentFormat
 from mimogpt.models.selftok.sd3.rectified_flow import RectifiedFlow
 from mimogpt.utils import hf_logger
 from torchvision.utils import save_image
+from diffusers import AutoencoderKL
 
 
 def load_state(model, state_dict, prefix='',init_method = None):
     model_dict = model.state_dict()  # 当前网络结构
+    # encoder.down.0.block.0.norm1.weight vae model
+    # encoder.down_blocks.0.resnets.0.norm1.weight weight state
+    # new_state_dict = state_dict.copy()
+    # for keys in state_dict.keys():
+    #     new_key = keys.replace("down_blocks","down").replace("resnets","").replace("up_blocks","down")
+    #     new_state_dict[new_key] = state_dict.pop(keys)
+    # state_dict = new_state_dict
+    # import pdb 
+    # pdb.set_trace()
+
     if prefix == 'model.diffusion_model.':
         excluded_keys = ['context_embedder.bias', 'context_embedder.weight']
         if init_method == 1:
@@ -54,15 +66,20 @@ def load_state(model, state_dict, prefix='',init_method = None):
             pretrained_dict = {k.replace(prefix,''): v for k, v in state_dict.items() if k.replace(prefix,'') in model_dict and k.replace(prefix,'') not in excluded_keys and 'context_block' not in k}
     else:
         pretrained_dict = {k.replace(prefix,''): v for k, v in state_dict.items() if k.replace(prefix,'') in model_dict}
+
     dict_t = deepcopy(pretrained_dict)
     for key, weight in dict_t.items():
         if key in model_dict and model_dict[key].shape != dict_t[key].shape:
             pretrained_dict.pop(key)
    
     m, u = model.load_state_dict(pretrained_dict, strict=False)
+
     if len(m) > 0:
+        hf_logger.info(" ----------------------- ")
         hf_logger.info(f"model missing keys:{m}")
+        
     if len(u) > 0:
+        hf_logger.info(" ----------------------- ")
         hf_logger.info(f"mode unexpected keys:{u}")
 
 class NormalizeToTensor(object):
@@ -134,7 +151,7 @@ def str_to_bool(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 class SelftokPipeline():
-    def __init__(self, cfg, ckpt_path, datasize = 256, start = 1.0, cfg_scale = 1,model_type='sd3', dtype=torch.bfloat16, ema_decoder=False, device=None):
+    def __init__(self, cfg, ckpt_path, sd3_path, datasize = 256, start = 1.0, cfg_scale = 1,model_type='sd3', dtype=torch.bfloat16, ema_decoder=False, device=None):
         
         self.cfg = cfg
         self.datasize = datasize
@@ -142,7 +159,8 @@ class SelftokPipeline():
         self.dtype = dtype
         # define models
         if self.model_type == 'sd3':
-            self.vae = set_sd3_vae(cfg.common.vae_path, device)
+            self.vae = AutoencoderKL.from_pretrained(sd3_path, subfolder="vae")
+            self.vae.to(device).to(self.dtype)
         else:
             raise ValueError(f"Unsupported MODEL_TYPE: {self.model_type}. Expected 'sd3'")
         cfg.tokenizer.params.noise_schedule_config.is_eval=cfg.common.is_eval
@@ -170,10 +188,11 @@ class SelftokPipeline():
         pretrain = ckpt_path
         
         state_dict = torch.load(pretrain, map_location="cpu")
+
         print(f"Loading all...")
         if self.ema_decoder==True:
             self.ema.load_state_dict(state_dict['ema_state_dict'])
-        self.model.load_state_dict(state_dict['state_dict'], strict=False)
+        self.model.load_state_dict(state_dict, strict=False)
         
         if self.ema_decoder==True:
             self.ema.to(device)
@@ -193,7 +212,7 @@ class SelftokPipeline():
         print(f"Begin encoding.")
 
         images = images.to(dtype=self.dtype, device=device) # Move images to GPU once per batch
-        x_0 = self.vae.encode(images)
+        x_0 = self.vae.encode(images, return_dict=False)[0].mode()
         x_0 = SD3LatentFormat().process_in(x_0)
         
         x_0 = x_0.to(torch.float32)
@@ -266,7 +285,7 @@ class SelftokPipeline():
             pred_x0_out = SD3LatentFormat().process_out(pred_x0)
 
             pred_x0_out = pred_x0_out.to(self.dtype)
-            recons = self.vae.decode(pred_x0_out)
+            recons = self.vae.decode(pred_x0_out,return_dict=False)[0]
         
         norm_ip(recons, -1, 1)
 
