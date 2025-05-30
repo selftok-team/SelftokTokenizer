@@ -313,7 +313,7 @@ class SelftokPipeline():
             pred_x0_out = SD3LatentFormat().process_out(pred_x0)
             
             pred_x0_out = pred_x0_out.to(self.dtype)
-            recons = self.vae.decode(pred_x0_out)
+            recons = self.vae.decode(pred_x0_out)[0]
         
         norm_ip(recons, -1, 1)
 
