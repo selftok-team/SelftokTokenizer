@@ -266,10 +266,10 @@ If you find our work useful, please cite our related paper:
 }
 
 # CVPR 2025
-@inproceedings{pan2025ddt,
-  title={DDT-LLaMA: Generative Multimodal Pretraining with Discrete Diffusion Timestep Tokens},
-  author={Kaihang Pan, Wang Lin, Zhongqi Yue, Tenglong Ao, Liyu Jia, Wei Zhao, Juncheng Li, Siliang Tang, Hanwang Zhang},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+@article{pan2025generative,
+  title={Generative Multimodal Pretraining with Discrete Diffusion Timestep Tokens},
+  author={Pan, Kaihang and Lin, Wang and Yue, Zhongqi and Ao, Tenglong and Jia, Liyu and Zhao, Wei and Li, Juncheng and Tang, Siliang and Zhang, Hanwang},
+  journal={arXiv preprint arXiv:2504.14666},
   year={2025}
 }
 
